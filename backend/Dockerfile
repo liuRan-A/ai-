@@ -1,5 +1,5 @@
 # Railway 检测到本 Dockerfile 后会跳过 Railpack，构建完全确定
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
