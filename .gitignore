@@ -1,0 +1,26 @@
+# —— 密钥与环境（绝不入库）——
+.env
+.env.*
+!.env.example
+
+# —— Python ——
+__pycache__/
+*.pyc
+backend/venv*/
+.pytest_cache/
+
+# —— Node / Vite ——
+node_modules/
+frontend/dist/
+frontend/node_modules/.vite/
+
+# —— 运行时产物 ——
+uploads/
+*.log
+backend/_*.py
+
+# —— IDE / 系统 ——
+.trae/
+.vscode/
+.DS_Store
+Thumbs.db
