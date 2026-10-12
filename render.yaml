@@ -1,0 +1,42 @@
+# Render 蓝图：https://render.com → New → Blueprint → 选择本仓库即可一键部署
+# 数据库：Render 不提供托管 MySQL，请先在 Aiven（aiven.io，免费档）或
+# TiDB Cloud Serverless 建一个 MySQL 实例，拿到连接信息后填到下面的环境变量。
+services:
+  - type: web
+    name: mockwise-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.4
+      # —— 以下在 Render 控制台填写（sync: false 表示不入库）——
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        value: mockwise
+      - key: SECRET_KEY
+        generateValue: true          # Render 自动生成强随机密钥
+      - key: DEEPSEEK_API_KEY
+        sync: false                  # 你的 DeepSeek Key
+      - key: IFLY_APP_ID
+        sync: false                  # 讯飞语音（可选，不填则语音转写不可用）
+      - key: IFLY_API_KEY
+        sync: false
+      - key: IFLY_API_SECRET
+        sync: false
+      # Vercel 前端域名，部署后改成你的实际域名，JSON 数组格式：
+      - key: CORS_ORIGINS
+        value: '["https://mockwise.vercel.app"]'
+      - key: LLM_TIMEOUT_S
+        value: "40"
+      - key: LLM_RETRY_TIMES
+        value: "1"
