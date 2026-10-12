@@ -16,9 +16,18 @@ class Settings(BaseSettings):
     DB_USER: str = os.getenv("DB_USER", "root")
     DB_PASSWORD: str = os.getenv("DB_PASSWORD", "root")
     DB_NAME: str = os.getenv("DB_NAME", "mockwise")
+    # Railway 等平台提供的一体化连接串（如 mysql://user:pass@host:3306/mockwise），
+    # 设置后优先于上面的分散字段
+    DATABASE_URL: str = ""
 
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
+        url = (self.DATABASE_URL or "").strip()
+        if url:
+            # SQLAlchemy 用 PyMySQL 驱动，需 mysql+pymysql:// 前缀
+            if url.startswith("mysql://"):
+                return "mysql+pymysql://" + url[len("mysql://"):]
+            return url
         return (
             f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}"
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}?charset=utf8mb4"
