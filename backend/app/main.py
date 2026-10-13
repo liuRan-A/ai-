@@ -78,6 +78,11 @@ async def all_exception_handler(request: Request, exc: Exception):
 
 @app.get("/", tags=["root"])
 def root():
+    # 前端产物已托管时，首页直接返回 SPA；否则返回 API 信息
+    index_file = os.path.join(WEBAPP_DIR, "index.html")
+    if os.path.isdir(WEBAPP_DIR) and os.path.isfile(index_file):
+        from fastapi.responses import FileResponse
+        return FileResponse(index_file)
     return {"code": 0, "msg": "ok", "data": {"name": settings.APP_NAME, "version": "v1.0"}}
 
 
@@ -89,3 +94,22 @@ def health():
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 app.include_router(ws_asr_router)
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+
+# —— 前端静态托管（统一入口）：webapp 目录由 frontend/dist 构建产物拷入 ——
+# 必须放在所有 API 路由之后注册，兜底路由不能吞掉 /api /docs /uploads。
+# 存在意义：*.vercel.app 在国内被 DNS 污染不可达，Railway 域名可达；
+# 前后端同源部署还能免去 CORS。
+WEBAPP_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "webapp")
+if os.path.isdir(WEBAPP_DIR):
+    from fastapi.responses import FileResponse
+
+    if os.path.isdir(os.path.join(WEBAPP_DIR, "assets")):
+        app.mount("/assets", StaticFiles(directory=os.path.join(WEBAPP_DIR, "assets")), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa_fallback(full_path: str):
+        """SPA 兜底：命中真实文件则返回文件，否则一律回退 index.html（前端路由）"""
+        candidate = os.path.normpath(os.path.join(WEBAPP_DIR, full_path))
+        if full_path and candidate.startswith(WEBAPP_DIR) and os.path.isfile(candidate):
+            return FileResponse(candidate)
+        return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))

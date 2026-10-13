@@ -1,0 +1,1 @@
+import{h as r}from"./index-Cm4t8RKh.js";const d={get:()=>r.get("/dashboard"),trend:(a=5)=>r.get("/dashboard/trend",{params:{limit:a}}),recommend:(a=3)=>r.get("/dashboard/recommend",{params:{limit:a}}),history:(a=5)=>r.get("/dashboard/history",{params:{limit:a}}),formStats:()=>r.get("/dashboard/form-stats")};export{d};

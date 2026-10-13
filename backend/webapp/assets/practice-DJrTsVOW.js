@@ -1,0 +1,1 @@
+import{h as a}from"./index-Cm4t8RKh.js";const s={weakPoints:()=>a.get("/practice/weak-points"),startCategory:t=>a.post("/practice/start",t),lastWeak:(t,e=70)=>a.get(`/practice/weak-questions/${t}`,{params:{threshold:e}})};export{s as p};
