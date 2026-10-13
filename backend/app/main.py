@@ -58,6 +58,9 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
+    # 生产前端部署在 Vercel，域名形如 https://xxx.vercel.app。用正则放行整个 vercel.app 域，
+    # 免去每换一个部署域名都要去 Railway 改环境变量
+    allow_origin_regex=r"https://([a-z0-9-]+\.)*vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
