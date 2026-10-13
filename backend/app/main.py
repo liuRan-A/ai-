@@ -32,6 +32,20 @@ async def lifespan(app: FastAPI):
         with engine.begin() as conn:
             conn.execute(text("ALTER TABLE session_questions ADD COLUMN video_url VARCHAR(255) NULL"))
         logging.info("migrated: session_questions.video_url added")
+    # 首次部署（用户表为空）时自动灌入演示数据，免去手动执行 seed.py。
+    # seed() 内部逐条判重，可安全重复执行；灌数据失败不应阻断服务启动。
+    from app.core.database import SessionLocal
+    from app.models.user import User
+    _db = SessionLocal()
+    try:
+        if _db.query(User).count() == 0:
+            from seed import seed as _seed_demo
+            _seed_demo()
+            logging.info("demo seed data inserted on first boot")
+    except Exception as exc:
+        logging.warning("demo seed skipped: %s", exc)
+    finally:
+        _db.close()
     yield
 
 
